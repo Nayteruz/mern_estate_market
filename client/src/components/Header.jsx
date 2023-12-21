@@ -25,7 +25,7 @@ const Header = () => {
 						<Link to="/about">About</Link>
 					</li>
 					<li className="cursor-pointer hidden sm:inline text-slate-700 hover:underline">
-						<Link to="/sign-in">SignIn</Link>
+						<Link to="/sign-in">Sign In</Link>
 					</li>
 				</ul>
 			</div>
