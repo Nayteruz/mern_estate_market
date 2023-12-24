@@ -30,7 +30,7 @@ const SignUp = () => {
 
       const data = await res.json();
 
-      if (!data.success) {
+      if (data.success === false) {
         setError(data.message);
         return;
       }
