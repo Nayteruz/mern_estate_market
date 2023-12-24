@@ -6,6 +6,7 @@ import {
   signInSuccess,
   signInFailure,
 } from '../store/user/userSlice';
+import OAuth from '../components/OAuth';
 
 const SignIn = () => {
   const [formData, setFormData] = useState({});
@@ -73,6 +74,7 @@ const SignIn = () => {
         >
           {loading ? 'Загрузка...' : 'Авторизоваться'}
         </button>
+        <OAuth />
       </form>
       <div className="flex gap-2 mt-5">
         <p>Нет аккаунта?</p>

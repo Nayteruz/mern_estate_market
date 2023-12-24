@@ -1,22 +1,29 @@
 import mongoose from "mongoose";
 
-const useSchema = new mongoose.Schema({
-	username: {
-		type: String,
-		required: true,
-		unique: true,
-	},
-	email: {
-		type: String,
-		required: true,
-		unique: true,
-	},
-	password: {
-		type: String,
-		required: true,
-	}
-}, {timestamps: true})
+const useSchema = new mongoose.Schema(
+  {
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    avatar: {
+      type: String,
+      default: "https://www.vecteezy.com/free-vector/default-profile-picture",
+    },
+  },
+  { timestamps: true }
+);
 
-const User = mongoose.model('User', useSchema);
+const User = mongoose.model("User", useSchema);
 
 export default User;
