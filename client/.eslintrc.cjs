@@ -17,12 +17,7 @@ module.exports = {
       'warn',
       { allowConstantExport: true },
     ],
-    'prettier/prettier': [
-      'warn',
-      {
-        endOfLine: 'auto'
-      }
-    ],
+    'prettier/prettier': "off",
     'react/prop-types': 'off',
     'react/react-in-jsx-scope': 'off',
     'prefer-const': 'warn',
