@@ -24,7 +24,7 @@ const Header = () => {
             <Link to="/">Главная</Link>
           </li>
           <li className="cursor-pointer hidden sm:inline text-slate-700 hover:underline">
-            <Link to="/about">Описание</Link>
+            <Link to="/about">О нас</Link>
           </li>
 
           <li className="cursor-pointer hidden sm:inline text-slate-700 hover:underline">
