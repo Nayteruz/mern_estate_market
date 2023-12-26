@@ -6,17 +6,57 @@ import {
   getDownloadURL,
 } from 'firebase/storage';
 import { useRef, useState, useEffect } from 'react';
+import {
+  updateUserStart,
+  updateUserFailure,
+  updateUserSuccess,
+} from '../store/user/userSlice';
+import { useDispatch } from 'react-redux';
 import { app } from '../firebase.js';
 
 const Profile = () => {
-  const { currentUser } = useSelector(state => state.user);
+  const { currentUser, loading, error } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
   const fileRef = useRef(null);
   const [file, setFile] = useState(undefined);
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadError, setUploadError] = useState(false);
   const [formData, setFormData] = useState({});
+  const [updateSuccess, setUpdateSuccess] = useState(false);
 
-  const onUpload = useRef(file => {
+  const onChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      setUpdateSuccess(false);
+      dispatch(updateUserStart());
+
+      const res = await fetch(`/api/user/update/${currentUser._id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (data.success === false) {
+        dispatch(updateUserFailure(data.message));
+        return;
+      }
+
+      dispatch(updateUserSuccess(data));
+      setUpdateSuccess(true);
+    } catch (err) {
+      dispatch(updateUserFailure(err.message));
+    }
+  };
+
+  const onUpload = useRef((file) => {
     if (file.size > 2 * 1024 * 1024) {
       setUploadError(true);
       return;
@@ -28,7 +68,7 @@ const Profile = () => {
 
     uploadTask.on(
       'state_changed',
-      snapshot => {
+      (snapshot) => {
         const progress = Math.round(
           (snapshot.bytesTransferred / snapshot.totalBytes) * 100,
         );
@@ -38,7 +78,7 @@ const Profile = () => {
         setUploadError(true);
       },
       () => {
-        getDownloadURL(uploadTask.snapshot.ref).then(downloadURL => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
           setFormData({ ...formData, avatar: downloadURL });
         });
       },
@@ -56,16 +96,16 @@ const Profile = () => {
   return (
     <div className="p-3 max-w-lg mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">Профиль</h1>
-      <form className="flex flex-col gap-4">
+      <form onSubmit={onSubmit} className="flex flex-col gap-4">
         <input
-          onChange={e => setFile(e.target.files[0])}
+          onChange={(e) => setFile(e.target.files[0])}
           type="file"
           ref={fileRef}
           hidden
           accept="image/*"
         />
         <img
-          src={formData.avatar || currentUser.avatar}
+          src={formData?.avatar || currentUser?.avatar}
           alt={currentUser.username}
           className="rounded-full h-24 w-24 object-cover cursor-pointer self-center mt-2"
           onClick={() => fileRef.current.click()}
@@ -89,30 +129,42 @@ const Profile = () => {
           placeholder="Имя пользователя"
           className="border p-3 rounded-lg"
           id="username"
+          defaultValue={currentUser.username}
+          onChange={onChange}
         />
         <input
           type="email"
           placeholder="Email"
           className="border p-3 rounded-lg"
           id="email"
+          defaultValue={currentUser.email}
+          onChange={onChange}
         />
         <input
           type="password"
           placeholder="Пароль"
           className="border p-3 rounded-lg"
           id="password"
+          onChange={onChange}
         />
         <button
+          disabled={loading}
           type="submit"
           className="bg-slate-700 p-3 text-white outline-none rounded-lg uppercase hover:opacity-95 disabled:opacity-80"
         >
-          Обновить
+          {loading ? 'Обновление...' : 'Обновить'}
         </button>
       </form>
       <div className="flex justify-between align-middle mt-5">
         <span className="text-red-700 cursor-pointer">Удалить аккаунт</span>
         <span className="text-red-700 cursor-pointer">Выйти из аккаунта</span>
       </div>
+      {error && <p className="text-red-700 mt-5">{error}</p>}
+      {updateSuccess && (
+        <p className="text-green-700 mt-5">
+          {updateSuccess ? 'Данные пользователя обновлены!' : ''}
+        </p>
+      )}
     </div>
   );
 };
