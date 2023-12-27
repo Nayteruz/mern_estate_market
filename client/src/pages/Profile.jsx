@@ -13,6 +13,9 @@ import {
   deleteUserStart,
   deleteUserSuccess,
   deleteUserFailure,
+  signOutUserStart,
+  signOutUserFailure,
+  signOutUserSuccess,
 } from '../store/user/userSlice';
 import { useDispatch } from 'react-redux';
 import { app } from '../firebase.js';
@@ -49,6 +52,23 @@ const Profile = () => {
       dispatch(deleteUserSuccess());
     } catch (err) {
       dispatch(deleteUserFailure(err));
+    }
+  };
+
+  const onSignOut = async () => {
+    try {
+      dispatch(signOutUserStart());
+      const res = await fetch('/api/auth/signout');
+      const data = await res.json();
+
+      if (data.success === false) {
+        dispatch(signOutUserFailure(data.message));
+        return;
+      }
+
+      dispatch(signOutUserSuccess());
+    } catch (err) {
+      dispatch(signOutUserFailure(err.message));
     }
   };
 
@@ -183,7 +203,9 @@ const Profile = () => {
         <span onClick={onDeleteUser} className="text-red-700 cursor-pointer">
           Удалить аккаунт
         </span>
-        <span className="text-red-700 cursor-pointer">Выйти из аккаунта</span>
+        <span onClick={onSignOut} className="text-red-700 cursor-pointer">
+          Выйти из аккаунта
+        </span>
       </div>
       {error && <p className="text-red-700 mt-5">{error}</p>}
       {updateSuccess && (
