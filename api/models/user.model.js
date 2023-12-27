@@ -18,7 +18,7 @@ const useSchema = new mongoose.Schema(
     },
     avatar: {
       type: String,
-      default: "https://www.vecteezy.com/free-vector/default-profile-picture",
+      default: "https://i.stack.imgur.com/34AD2.jpg",
     },
   },
   { timestamps: true }

@@ -10,6 +10,9 @@ import {
   updateUserStart,
   updateUserFailure,
   updateUserSuccess,
+  deleteUserStart,
+  deleteUserSuccess,
+  deleteUserFailure,
 } from '../store/user/userSlice';
 import { useDispatch } from 'react-redux';
 import { app } from '../firebase.js';
@@ -26,6 +29,27 @@ const Profile = () => {
 
   const onChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const onDeleteUser = async () => {
+    try {
+      dispatch(deleteUserStart());
+
+      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+        method: 'DELETE',
+      });
+
+      const data = await res.json();
+
+      if (data.success === false) {
+        dispatch(deleteUserFailure(data.message));
+        return;
+      }
+
+      dispatch(deleteUserSuccess());
+    } catch (err) {
+      dispatch(deleteUserFailure(err));
+    }
   };
 
   const onSubmit = async (e) => {
@@ -156,13 +180,15 @@ const Profile = () => {
         </button>
       </form>
       <div className="flex justify-between align-middle mt-5">
-        <span className="text-red-700 cursor-pointer">Удалить аккаунт</span>
+        <span onClick={onDeleteUser} className="text-red-700 cursor-pointer">
+          Удалить аккаунт
+        </span>
         <span className="text-red-700 cursor-pointer">Выйти из аккаунта</span>
       </div>
       {error && <p className="text-red-700 mt-5">{error}</p>}
       {updateSuccess && (
         <p className="text-green-700 mt-5">
-          {updateSuccess ? 'Данные пользователя обновлены!' : ''}
+          {updateSuccess ? 'Данные обновлены!' : ''}
         </p>
       )}
     </div>
