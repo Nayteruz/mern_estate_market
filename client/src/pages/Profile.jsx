@@ -19,6 +19,7 @@ import {
 } from '../store/user/userSlice';
 import { useDispatch } from 'react-redux';
 import { app } from '../firebase.js';
+import { Link } from 'react-router-dom';
 
 const Profile = () => {
   const { currentUser, loading, error } = useSelector((state) => state.user);
@@ -198,6 +199,12 @@ const Profile = () => {
         >
           {loading ? 'Обновление...' : 'Обновить'}
         </button>
+        <Link
+          className="bg-green-700 text-white p-3 rounded-lg uppercase text-center hover:opacity-95"
+          to="/create-listing"
+        >
+          Добавить объявление
+        </Link>
       </form>
       <div className="flex justify-between align-middle mt-5">
         <span onClick={onDeleteUser} className="text-red-700 cursor-pointer">
