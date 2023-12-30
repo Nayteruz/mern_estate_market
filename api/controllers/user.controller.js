@@ -1,6 +1,7 @@
 import { errorHandler } from "../utils/error.js";
 import bcryptjs from "bcryptjs";
 import User from "../models/user.model.js";
+import Listing from "../models/listing.model.js";
 
 export const updateUser = async (req, res, next) => {
   if (req.user.id !== req.params.id) {
@@ -44,5 +45,18 @@ export const deleteUser = async (req, res, next) => {
     res.status(200).json("User has been deleted!");
   } catch (err) {
     next(err);
+  }
+};
+
+export const getUserListing = async (req, res, next) => {
+  if (req.user.id === req.params.id) {
+    try {
+      const listings = await Listing.find({ userRef: req.params.id });
+      res.status(200).json(listings);
+    } catch (err) {
+      next(err);
+    }
+  } else {
+    next(errorHandler(401, "Вы можете просматривать только свои объявления"));
   }
 };
