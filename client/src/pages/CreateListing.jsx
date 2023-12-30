@@ -6,14 +6,33 @@ import {
   uploadBytesResumable,
 } from 'firebase/storage';
 import { app } from '../firebase.js';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 const CreateListing = () => {
+  const { currentUser } = useSelector((state) => state.user);
+  const navigate = useNavigate();
   const [files, setFiles] = useState([]);
   const [formData, setFormData] = useState({
     imageUrls: [],
+    name: '',
+    description: '',
+    address: '',
+    type: 'rent',
+    bedrooms: 1,
+    bathrooms: 1,
+    regularPrice: 500,
+    discountedPrice: 0,
+    offer: false,
+    parking: false,
+    furnished: false,
   });
   const [imageUploadError, setImageUploadError] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  console.log(formData);
 
   const storeImage = async (file) => {
     return new Promise((resolve, reject) => {
@@ -78,12 +97,75 @@ const CreateListing = () => {
     }
   };
 
+  const onChange = (e) => {
+    const { name, value, checked, type } = e.target;
+    if (['sale', 'rent'].includes(name)) {
+      setFormData({
+        ...formData,
+        type: name,
+      });
+    }
+    if (['parking', 'furnished', 'offer'].includes(name)) {
+      setFormData({
+        ...formData,
+        [name]: checked,
+      });
+    }
+
+    if (['number', 'text', 'textarea'].includes(type)) {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+
+    if (formData.imageUrls.length < 1) {
+      return setSubmitError('Необходимо загрузить не менее 1 фото');
+    }
+
+    if (+formData.regularPrice < +formData.discountedPrice) {
+      return setSubmitError('Цена скидки должна быть меньше основной цены');
+    }
+
+    try {
+      setLoading(true);
+      setSubmitError('');
+
+      const res = await fetch('/api/listing/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          userRef: currentUser._id,
+        }),
+      });
+
+      const data = await res.json();
+      setLoading(false);
+
+      if (data.success === false) {
+        setSubmitError(data.message);
+      }
+
+      navigate(`/listing/${data._id}`);
+    } catch (err) {
+      setSubmitError(err.message);
+      setLoading(false);
+    }
+  };
+
   return (
     <main className="p-3 max-w-4xl mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">
         Создать объявление
       </h1>
-      <form className="flex flex-col sm:flex-row gap-4">
+      <form onSubmit={onSubmit} className="flex flex-col sm:flex-row gap-4">
         <div className="flex flex-col gap-4 flex-1">
           <input
             type="text"
@@ -94,6 +176,8 @@ const CreateListing = () => {
             maxLength={62}
             minLength={10}
             required
+            onChange={onChange}
+            value={formData.name}
           />
           <textarea
             name="description"
@@ -101,6 +185,8 @@ const CreateListing = () => {
             placeholder="Описание"
             className="border p-3 rounded-lg w-full"
             required
+            onChange={onChange}
+            value={formData.description}
           ></textarea>
           <input
             type="text"
@@ -109,26 +195,63 @@ const CreateListing = () => {
             placeholder="Адрес"
             className="border p-3 rounded-lg w-full"
             required
+            onChange={onChange}
+            value={formData.address}
           />
           <div className="flex gap-6 flex-wrap">
             <div className="flex gap-2">
-              <input type="checkbox" id="sale" className="w-5" />
+              <input
+                type="checkbox"
+                name="sale"
+                id="sale"
+                className="w-5"
+                onChange={onChange}
+                checked={formData.type === 'sale'}
+              />
               <span>Продажа</span>
             </div>
             <div className="flex gap-2">
-              <input type="checkbox" id="rent" className="w-5" />
+              <input
+                type="checkbox"
+                name="rent"
+                id="rent"
+                className="w-5"
+                checked={formData.type === 'rent'}
+                onChange={onChange}
+              />
               <span>Аренда</span>
             </div>
             <div className="flex gap-2">
-              <input type="checkbox" id="parking" className="w-5" />
+              <input
+                type="checkbox"
+                name="parking"
+                id="parking"
+                className="w-5"
+                onChange={onChange}
+                checked={formData.parking}
+              />
               <span>Парковочное место</span>
             </div>
             <div className="flex gap-2">
-              <input type="checkbox" id="furnished" className="w-5" />
+              <input
+                type="checkbox"
+                name="furnished"
+                id="furnished"
+                className="w-5"
+                onChange={onChange}
+                checked={formData.furnished}
+              />
               <span>Мебелированная</span>
             </div>
             <div className="flex gap-2">
-              <input type="checkbox" id="offer" className="w-5" />
+              <input
+                type="checkbox"
+                name="offer"
+                id="offer"
+                className="w-5"
+                onChange={onChange}
+                checked={formData.offer}
+              />
               <span>Предложение</span>
             </div>
           </div>
@@ -136,53 +259,67 @@ const CreateListing = () => {
             <div className="flex items-center gap-2">
               <input
                 type="number"
+                name="bedrooms"
                 id="bedrooms"
                 min={1}
                 max={10}
                 required
                 className="p-3 border border-gray-300 rounded-lg"
+                onChange={onChange}
+                value={formData.bedrooms}
               />
               <p>Кровать</p>
             </div>
             <div className="flex items-center gap-2">
               <input
                 type="number"
+                name="bathrooms"
                 id="bathrooms"
                 min={1}
                 max={10}
                 required
                 className="p-3 border border-gray-300 rounded-lg"
+                onChange={onChange}
+                value={formData.bathrooms}
               />
               <p>Ванная</p>
             </div>
             <div className="flex items-center gap-2">
               <input
                 type="number"
+                name="regularPrice"
                 id="regularPrice"
-                min={1}
-                max={10}
+                min={500}
+                max={1000000}
                 required
                 className="p-3 border border-gray-300 rounded-lg"
+                onChange={onChange}
+                value={formData.regularPrice}
               />
               <div className="flex flex-col items-center">
                 <p>Цена</p>
                 <span className="text-xs">(руб/месяц)</span>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                id="discountPrice"
-                min={1}
-                max={10}
-                required
-                className="p-3 border border-gray-300 rounded-lg"
-              />
-              <div className="flex flex-col items-center">
-                <p>Со скидкой</p>
-                <span className="text-xs">(руб/месяц)</span>
+            {formData.offer && (
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  name="discountedPrice"
+                  id="discountedPrice"
+                  min={0}
+                  max={1000000}
+                  required
+                  className="p-3 border border-gray-300 rounded-lg"
+                  onChange={onChange}
+                  value={formData.discountedPrice}
+                />
+                <div className="flex flex-col items-center">
+                  <p>Со скидкой</p>
+                  <span className="text-xs">(руб/месяц)</span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
         <div className="flex flex-col flex-1 gap-4">
@@ -233,9 +370,13 @@ const CreateListing = () => {
                 </button>
               </div>
             ))}
-          <button className="p-3 bg-slate-700 text-white rounded-lg uppercase hover:opacity-95 disabled:opacity-80">
-            Создать объявление
+          <button
+            disabled={loading || uploading}
+            className="p-3 bg-slate-700 text-white rounded-lg uppercase hover:opacity-95 disabled:opacity-80"
+          >
+            {loading ? 'Загрузка объявления...' : 'Создать объявление'}
           </button>
+          {submitError && <p className="text-red-700 text-sm">{submitError}</p>}
         </div>
       </form>
     </main>
