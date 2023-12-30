@@ -148,6 +148,26 @@ const Profile = () => {
     }
   };
 
+  const onDeleteListing = async (listingId) => {
+    try {
+      const res = await fetch(`/api/listing/delete/${listingId}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+
+      if (data.success === false) {
+        console.log(data.message);
+        return;
+      }
+
+      setUserListings((prev) =>
+        prev.filter((listing) => listing._id !== listingId),
+      );
+    } catch (err) {
+      console.log(err.message);
+    }
+  };
+
   useEffect(() => {
     const onUploadAction = onUpload.current;
 
@@ -238,14 +258,14 @@ const Profile = () => {
           {updateSuccess ? 'Данные обновлены!' : ''}
         </p>
       )}
-      <button onClick={showListings} className="text-green-700 w-full">
+      <button onClick={showListings} className="text-green-700 w-full mt-3">
         Показать объявления
       </button>
       {showListingsError && (
         <p className="text-red-700 mt-5">Ошибка показа объявлений</p>
       )}
 
-      {userListings && (
+      {userListings && userListings.length > 0 && (
         <div className="flex flex-col gap-4">
           <h2 className="text-center mt-7 text-2xl font-semibold ">
             Ваши объявления
@@ -268,7 +288,10 @@ const Profile = () => {
                 </p>
               </Link>
               <div className="flex flex-col gap-1">
-                <button className="text-red-700 uppercase text-sm hover:underline">
+                <button
+                  onClick={() => onDeleteListing(listing._id)}
+                  className="text-red-700 uppercase text-sm hover:underline"
+                >
                   Удалить
                 </button>
                 <button className="text-green-700 uppercase text-sm hover:underline">
