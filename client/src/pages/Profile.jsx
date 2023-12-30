@@ -30,6 +30,8 @@ const Profile = () => {
   const [uploadError, setUploadError] = useState(false);
   const [formData, setFormData] = useState({});
   const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [showListingsError, setShowListingsError] = useState(false);
+  const [userListings, setUserListings] = useState([]);
 
   const onChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -130,6 +132,22 @@ const Profile = () => {
     );
   });
 
+  const showListings = async () => {
+    try {
+      const res = await fetch(`/api/user/listings/${currentUser._id}`);
+      const data = await res.json();
+
+      if (data.success === false) {
+        setShowListingsError(true);
+        return;
+      }
+
+      setUserListings(data);
+    } catch (err) {
+      setShowListingsError(true);
+    }
+  };
+
   useEffect(() => {
     const onUploadAction = onUpload.current;
 
@@ -219,6 +237,47 @@ const Profile = () => {
         <p className="text-green-700 mt-5">
           {updateSuccess ? 'Данные обновлены!' : ''}
         </p>
+      )}
+      <button onClick={showListings} className="text-green-700 w-full">
+        Показать объявления
+      </button>
+      {showListingsError && (
+        <p className="text-red-700 mt-5">Ошибка показа объявлений</p>
+      )}
+
+      {userListings && (
+        <div className="flex flex-col gap-4">
+          <h2 className="text-center mt-7 text-2xl font-semibold ">
+            Ваши объявления
+          </h2>
+          {userListings.map((listing) => (
+            <div
+              key={listing._id}
+              className="flex justify-between items-center gap-4 border rounded-lg p-2"
+            >
+              <Link to={`/listing/${listing._id}`}>
+                <img
+                  src={listing.imageUrls[0]}
+                  alt={listing.name}
+                  className="h-16 w-16 object-contain rounded-lg"
+                />
+              </Link>
+              <Link to={`/listing/${listing._id}`} className="flex-1">
+                <p className="text-slate-700 font-semibold flex-1 hover:underline truncate">
+                  {listing.name}
+                </p>
+              </Link>
+              <div className="flex flex-col gap-1">
+                <button className="text-red-700 uppercase text-sm hover:underline">
+                  Удалить
+                </button>
+                <button className="text-green-700 uppercase text-sm hover:underline">
+                  Изменить
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
