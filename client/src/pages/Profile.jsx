@@ -20,6 +20,7 @@ import {
 import { useDispatch } from 'react-redux';
 import { app } from '../firebase.js';
 import { Link } from 'react-router-dom';
+import { Spinner } from '../components/Spinner.jsx';
 
 const Profile = () => {
   const { currentUser, loading, error } = useSelector((state) => state.user);
@@ -32,6 +33,7 @@ const Profile = () => {
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [showListingsError, setShowListingsError] = useState(false);
   const [userListings, setUserListings] = useState([]);
+  const [loadListings, setLoadListings] = useState(false);
 
   const onChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -133,6 +135,7 @@ const Profile = () => {
   });
 
   const showListings = async () => {
+    setLoadListings(true);
     try {
       const res = await fetch(`/api/user/listings/${currentUser._id}`);
       const data = await res.json();
@@ -145,6 +148,8 @@ const Profile = () => {
       setUserListings(data);
     } catch (err) {
       setShowListingsError(true);
+    } finally {
+      setLoadListings(false);
     }
   };
 
@@ -264,8 +269,12 @@ const Profile = () => {
       {showListingsError && (
         <p className="text-red-700 mt-5">Ошибка показа объявлений</p>
       )}
-
-      {userListings && userListings.length > 0 && (
+      {loadListings && (
+        <p className="flex items-center justify-center mt-5">
+          <Spinner size={24} />
+        </p>
+      )}
+      {userListings && !loadListings && userListings.length > 0 && (
         <div className="flex flex-col gap-4">
           <h2 className="text-center mt-7 text-2xl font-semibold ">
             Ваши объявления
@@ -294,9 +303,11 @@ const Profile = () => {
                 >
                   Удалить
                 </button>
-                <button className="text-green-700 uppercase text-sm hover:underline">
-                  Изменить
-                </button>
+                <Link to={`/update-listing/${listing._id}`}>
+                  <button className="text-green-700 uppercase text-sm hover:underline">
+                    Изменить
+                  </button>
+                </Link>
               </div>
             </div>
           ))}
