@@ -13,18 +13,22 @@ import {
   FaParking,
   FaShare,
 } from 'react-icons/fa';
+import { useSelector } from 'react-redux';
+import Contact from '@/components/Contact.jsx';
 
 const Listing = () => {
   SwiperCore.use([Navigation]);
   const params = useParams();
+  const { currentUser } = useSelector((state) => state.user);
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [contact, setContact] = useState(false);
 
   const declOfNum = (n, titles) => {
     return titles[
-      n % 10 == 1 && n % 100 != 11
+      n % 10 === 1 && n % 100 !== 11
         ? 0
         : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)
           ? 1
@@ -151,6 +155,15 @@ const Listing = () => {
                 {listing.furnished ? 'Мебелированная' : 'Без мебели'}
               </li>
             </ul>
+            {currentUser && listing.userRef !== currentUser._id && !contact && (
+              <button
+                onClick={() => setContact(true)}
+                className="bg-slate-700 text-white uppercase rounded-lg p-3 hover:opacity-95"
+              >
+                Связаться с нами
+              </button>
+            )}
+            {contact && <Contact listing={listing} />}
           </div>
         </>
       )}
