@@ -9,7 +9,6 @@ import {
   FaBath,
   FaBed,
   FaChair,
-  FaMapMarkedAlt,
   FaMapMarkerAlt,
   FaParking,
   FaShare,
@@ -22,6 +21,16 @@ const Listing = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  const declOfNum = (n, titles) => {
+    return titles[
+      n % 10 == 1 && n % 100 != 11
+        ? 0
+        : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)
+          ? 1
+          : 2
+    ];
+  };
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -121,17 +130,19 @@ const Listing = () => {
             <ul className="text-green-900 font-semibold text-sm flex flex-wrap items-center gap-4 sm:gap-6">
               <li className="flex items-center gap-1 whitespace-nowrap ">
                 <FaBed className="text-lg" />
-                {listing.bedrooms > 1
-                  ? `${listing.bedrooms} кроватей `
-                  : `${listing.bedrooms} кровать `}
+                {listing.bedrooms}
+                {declOfNum(listing.bedrooms, [
+                  'кровать',
+                  'кровати',
+                  'кроватей',
+                ])}
               </li>
               <li className="flex items-center gap-1 whitespace-nowrap ">
                 <FaBath className="text-lg" />
-                {listing.bathrooms > 1
-                  ? `${listing.bathrooms} ванных `
-                  : `${listing.bathrooms} ванная `}
+                {listing.bathrooms}
+                {declOfNum(listing.bathrooms, ['ванная', 'ванны', 'ванн'])}
               </li>
-              <li className="flex items-center gap-1 whitespace-nowrap ">
+              <li className="flex items-center gap-1 whitespace-nowrap">
                 <FaParking className="text-lg" />
                 {listing.parking ? 'Парковочное место' : 'Без парковки'}
               </li>
