@@ -282,16 +282,16 @@ const Profile = () => {
           {userListings.map((listing) => (
             <div
               key={listing._id}
-              className="flex justify-between items-center gap-4 border rounded-lg p-2"
+              className="grid grid-cols-[64px_minmax(0,_1fr)_auto] gap-3 items-center gap-4 border rounded-lg p-2"
             >
               <Link to={`/listing/${listing._id}`}>
                 <img
                   src={listing.imageUrls[0]}
                   alt={listing.name}
-                  className="h-16 w-16 object-contain rounded-lg"
+                  className="h-16 w-16 object-contain rounded-lg flex-shrink"
                 />
               </Link>
-              <Link to={`/listing/${listing._id}`} className="flex-1">
+              <Link to={`/listing/${listing._id}`}>
                 <p className="text-slate-700 font-semibold flex-1 hover:underline truncate">
                   {listing.name}
                 </p>

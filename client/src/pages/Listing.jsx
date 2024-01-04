@@ -26,16 +26,6 @@ const Listing = () => {
   const [copied, setCopied] = useState(false);
   const [contact, setContact] = useState(false);
 
-  const declOfNum = (n, titles) => {
-    return titles[
-      n % 10 === 1 && n % 100 !== 11
-        ? 0
-        : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)
-          ? 1
-          : 2
-    ];
-  };
-
   useEffect(() => {
     const fetchListing = async () => {
       try {
@@ -70,12 +60,7 @@ const Listing = () => {
       )}
       {listing && !loading && !error && (
         <>
-          <Swiper
-            navigation={true}
-            loop={true}
-            onSlideChange={() => console.log('slide change')}
-            onSwiper={(swiper) => console.log(swiper)}
-          >
+          <Swiper navigation={true} loop={true}>
             {listing.imageUrls.map((url) => (
               <SwiperSlide key={url}>
                 <div
@@ -109,7 +94,7 @@ const Listing = () => {
             <p className="text-2xl font-semibold">
               {listing.name} -{' '}
               {listing.offer
-                ? listing?.discountPrice?.toLocaleString('ru-RU')
+                ? listing.discountedPrice.toLocaleString('ru-RU')
                 : listing.regularPrice.toLocaleString('ru-RU')}
               {listing.type === 'rent' ? ' руб. / месяц' : ' руб.'}
             </p>
@@ -123,7 +108,7 @@ const Listing = () => {
               </p>
               {listing.offer && (
                 <p className="bg-green-900 w-full max-w-[200px] text-white text-center p-1 rounded-md">
-                  ${+listing.regularPrice - +listing.discountPrice}
+                  {+listing.regularPrice - +listing.discountedPrice} руб
                 </p>
               )}
             </div>
@@ -134,17 +119,11 @@ const Listing = () => {
             <ul className="text-green-900 font-semibold text-sm flex flex-wrap items-center gap-4 sm:gap-6">
               <li className="flex items-center gap-1 whitespace-nowrap ">
                 <FaBed className="text-lg" />
-                {listing.bedrooms}
-                {declOfNum(listing.bedrooms, [
-                  'кровать',
-                  'кровати',
-                  'кроватей',
-                ])}
+                {`кроватей - ${listing.bedrooms}`}
               </li>
               <li className="flex items-center gap-1 whitespace-nowrap ">
                 <FaBath className="text-lg" />
-                {listing.bathrooms}
-                {declOfNum(listing.bathrooms, ['ванная', 'ванны', 'ванн'])}
+                {`ванн - ${listing.bathrooms}`}
               </li>
               <li className="flex items-center gap-1 whitespace-nowrap">
                 <FaParking className="text-lg" />

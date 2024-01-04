@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Spinner } from '@/components/Spinner.jsx';
+import ListingItem from '@/components/ListingItem.jsx';
 
 const Search = () => {
   const navigate = useNavigate();
@@ -210,6 +212,23 @@ const Search = () => {
         <h1 className="text-3xl font-semibold border-b p-3 text-slate-700 mt-5">
           Результаты поиска:
         </h1>
+        <div className="p-7 flex flex-wrap gap-4">
+          {!loading && listings.length === 0 && (
+            <p className="text-xl text-slate-700">Список объявлений пуст!</p>
+          )}
+          {loading && (
+            <p className="text-center">
+              <Spinner size={24} />
+            </p>
+          )}
+          {!loading && listings && (
+            <div className="grid w-full lg:grid-cols-3 gap-4 md:grid-cols-2 sm:grid-cols-1">
+              {listings.map((listing) => (
+                <ListingItem key={listing._id} listing={listing} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
