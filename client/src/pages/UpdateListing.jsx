@@ -267,7 +267,7 @@ const UpdateListing = () => {
                 onChange={onChange}
                 checked={formData.offer}
               />
-              <span>Предложение</span>
+              <span>Агент</span>
             </div>
           </div>
           <div className="flex flex-wrap gap-6">
