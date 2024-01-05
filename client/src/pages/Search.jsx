@@ -16,6 +16,7 @@ const Search = () => {
   });
   const [loading, setLoading] = useState(false);
   const [listings, setListings] = useState([]);
+  const [showMore, setShowMore] = useState(false);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
@@ -54,10 +55,25 @@ const Search = () => {
       const data = await res.json();
       setListings(data);
       setLoading(false);
+      setShowMore(data.length > 8);
     };
 
     fetchListing();
   }, [location.search]);
+
+  const onShowMoreClick = async () => {
+    const startIndex = listings.length;
+    const urlParams = new URLSearchParams(location.search);
+    urlParams.set('startIndex', startIndex);
+    const searchQuery = urlParams.toString();
+    const res = await fetch(`/api/listing/get?${searchQuery}`);
+    const data = await res.json();
+    if (data.length < 9) {
+      setShowMore(false);
+    }
+
+    setListings([...listings, ...data]);
+  };
 
   const onChange = (e) => {
     const { id, value, checked } = e.target;
@@ -227,6 +243,14 @@ const Search = () => {
                 <ListingItem key={listing._id} listing={listing} />
               ))}
             </div>
+          )}
+          {showMore && (
+            <button
+              className="text-green-700 hover:underline p-7 text-center w-full"
+              onClick={onShowMoreClick}
+            >
+              Показать еще
+            </button>
           )}
         </div>
       </div>
