@@ -60,7 +60,7 @@ const Listing = () => {
       )}
       {listing && !loading && !error && (
         <>
-          <Swiper navigation={true} loop={true}>
+          <Swiper navigation={true} loop={listing.imageUrls.length > 1}>
             {listing.imageUrls.map((url) => (
               <SwiperSlide key={url}>
                 <div
@@ -104,7 +104,7 @@ const Listing = () => {
             </p>
             <div className="flex gap-4">
               <p className="bg-red-900 w-full max-w-[200px] text-white text-center p-1 rounded-md">
-                {listing.type === 'rent' ? 'Для аренды' : 'Для продажи'}
+                {listing.type === 'rent' ? 'Аренда' : 'Продажа'}
               </p>
               {listing.offer && (
                 <p className="bg-green-900 w-full max-w-[200px] text-white text-center p-1 rounded-md">
